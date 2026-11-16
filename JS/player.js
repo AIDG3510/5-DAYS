@@ -1,5 +1,7 @@
+import { getCurrentRoom, isColliding } from './world.js';
+
 export const player = {
-    x: 300,
+    x: 240,
     y: 220,
     width: 24,
     height: 24,
@@ -7,50 +9,39 @@ export const player = {
     color: '#e6c280'
 };
 
-const keys = {
-    ArrowUp: false,
-    ArrowDown: false,
-    ArrowLeft: false,
-    ArrowRight: false,
-    w: false,
-    s: false,
-    a: false,
-    d: false
-};
+const keys = {};
 
 window.addEventListener('keydown', (e) => {
-    if (e.key in keys) {
-        keys[e.key] = true;
-    }
+    keys[e.key.toLowerCase()] = true;
 });
 
 window.addEventListener('keyup', (e) => {
-    if (e.key in keys) {
-        keys[e.key] = false;
-    }
+    keys[e.key.toLowerCase()] = false;
 });
 
-export function updatePlayer(canvasWidth, canvasHeight) {
-    if (keys.ArrowUp || keys.w) {
-        player.y -= player.speed;
+function hitsObstacle(nextX, nextY) {
+    const room = getCurrentRoom();
+    const hitbox = { x: nextX, y: nextY, width: player.width, height: player.height };
+    return room.obstacles.some((obs) => isColliding(hitbox, obs));
+}
+
+export function updatePlayer() {
+    let dx = 0;
+    let dy = 0;
+
+    if (keys['arrowup'] || keys['w']) dy -= player.speed;
+    if (keys['arrowdown'] || keys['s']) dy += player.speed;
+    if (keys['arrowleft'] || keys['a']) dx -= player.speed;
+    if (keys['arrowright'] || keys['d']) dx += player.speed;
+
+    // comprobar colisión
+    if (dx !== 0 && !hitsObstacle(player.x + dx, player.y)) {
+        player.x += dx;
     }
-    if (keys.ArrowDown || keys.s) {
-        player.y += player.speed;
-    }
-    if (keys.ArrowLeft || keys.a) {
-        player.x -= player.speed;
-    }
-    if (keys.ArrowRight || keys.d) {
-        player.x += player.speed;
-    }
-// Barrera del canvas
-    if (player.x < 0) player.x = 0;
-    if (player.y < 0) player.y = 0;
-    if (player.x + player.width > canvasWidth) {
-        player.x = canvasWidth - player.width;
-    }
-    if (player.y + player.height > canvasHeight) {
-        player.y = canvasHeight - player.height;
+
+    // comprobar colisión en Y
+    if (dy !== 0 && !hitsObstacle(player.x, player.y + dy)) {
+        player.y += dy;
     }
 }
 

@@ -1,4 +1,5 @@
-import { updatePlayer, renderPlayer } from './player.js';
+import { player, updatePlayer, renderPlayer } from './player.js';
+import { renderWorld, checkWorldTransitions } from './world.js';
 
 const canvas = document.getElementById('game-canvas');
 const ctx = canvas.getContext('2d');
@@ -21,14 +22,11 @@ function gameLoop() {
 }
 
 function update() {
-    updatePlayer(canvas.width, canvas.height);
+    updatePlayer();
+    checkWorldTransitions(player);
 }
 
 function render() {
-    // Limpiar pantalla
-    ctx.fillStyle = '#181818';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Dibujar jugador
+    renderWorld(ctx, canvas.width, canvas.height);
     renderPlayer(ctx);
 }
