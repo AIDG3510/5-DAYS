@@ -1,11 +1,29 @@
 import { player, updatePlayer, renderPlayer } from './player.js';
 import { renderWorld, checkWorldTransitions } from './world.js';
+<<<<<<< HEAD
 import { addItem, toggleSelectSlot, renderInventoryHUD } from './inventory.js';
+=======
+import {
+    updateClock,
+    renderDayNightOverlay,
+    renderClockHUD,
+    sleepUntilMorning,
+    adjustTime
+} from './clock.js';
+>>>>>>> feature/sistema-reloj
 
 const canvas = document.getElementById('game-canvas');
 const ctx = canvas.getContext('2d');
 
 let isRunning = false;
+let lastTimestamp = 0;
+
+// Atajos temporales de prueba (T: adelantar 1 hora, N: dormir al día siguiente)
+window.addEventListener('keydown', (e) => {
+    const key = e.key.toLowerCase();
+    if (key === 't') adjustTime(60);
+    if (key === 'n') sleepUntilMorning();
+});
 
 // Objetos iniciales de prueba para verificar las 4 combinaciones (se quitarán al ponerlos en el mapa)
 addItem('Linterna');
@@ -23,25 +41,36 @@ window.addEventListener('keydown', (e) => {
 export function startGame() {
     if (isRunning) return;
     isRunning = true;
+    lastTimestamp = performance.now();
     requestAnimationFrame(gameLoop);
 }
 
-function gameLoop() {
+function gameLoop(timestamp) {
     if (!isRunning) return;
 
-    update();
+    const deltaSeconds = (timestamp - lastTimestamp) / 1000;
+    lastTimestamp = timestamp;
+
+    update(deltaSeconds);
     render();
 
     requestAnimationFrame(gameLoop);
 }
 
-function update() {
+function update(deltaSeconds) {
     updatePlayer();
     checkWorldTransitions(player);
+    updateClock(deltaSeconds);
 }
 
 function render() {
     renderWorld(ctx, canvas.width, canvas.height);
     renderPlayer(ctx);
+<<<<<<< HEAD
     renderInventoryHUD(ctx, canvas.width, canvas.height);
 }
+=======
+    renderDayNightOverlay(ctx, canvas.width, canvas.height);
+    renderClockHUD(ctx, canvas.width);
+}
+>>>>>>> feature/sistema-reloj
