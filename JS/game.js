@@ -1,3 +1,5 @@
+import { updatePlayer, renderPlayer } from './player.js';
+
 const canvas = document.getElementById('game-canvas');
 const ctx = canvas.getContext('2d');
 
@@ -19,16 +21,14 @@ function gameLoop() {
 }
 
 function update() {
-    // jugador, reloj, colisiones.
+    updatePlayer(canvas.width, canvas.height);
 }
 
 function render() {
-    // Limpiar fotogramas
+    // Limpiar pantalla
     ctx.fillStyle = '#181818';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Texto temporal para comprobar que el canvas funciona
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '18px Courier New';
-    ctx.fillText('Motor de 5 DAYS iniciado...', 20, 40);
+    // Dibujar jugador
+    renderPlayer(ctx);
 }
