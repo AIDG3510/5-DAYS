@@ -2,30 +2,66 @@ export const dialogueState = {
     active: false,
     queue: [],
     currentIndex: 0,
-    isEnding: false
+    isEnding: false,
+    onDone: null
 };
 
-const introLines = [
-    'Línea 1: La casa parece más silenciosa desde que empezó esta semana.',
-    'Línea 2: Mamá pasa casi todo el tiempo en la sala mirando por la ventana.',
-    'Línea 3: Dice que ha perdido diez hojas importantes de su diario.',
-    'Línea 4: Algunas quedaron escondidas en rincones oscuros o difíciles de alcanzar.',
-    'Línea 5: Solo tenemos cinco días antes de tener que mudarnos.',
-    'Línea 6: El viejo reloj de la sala parece alterar la percepción del tiempo.',
-    'Línea 7: Si combino objetos útiles de la casa podré llegar a cada rincón.',
-    'Línea 8: Muévete con WASD o flechas, e interactúa con la tecla E.',
-    'Línea 9: Encuentra las 10 hojas antes de que termine el quinto día.'
+export const INTRO_LINES = [
+    'MAMÁ: Ya está decidido. Nos vamos en cinco días.',
+    'No dijo por qué. Yo no pregunté.',
+    'Me dio cinco días para recoger mis cosas.',
+    'Guardé los juguetes. La ropa. Los dibujos.',
+    'Y entonces busqué mi libro. El que ella me leía antes de dormir.',
+    'Estaba debajo de la cama. Pero le faltaban diez hojas.',
+    'Diez hojas. Cinco días.',
+    'Dos por día. Ni una más.',
+    'Si las encuentro todas, quizá todo siga igual.'
 ];
 
-export function startIntroDialogue() {
-    showDialogue(introLines, false);
+const MORNING_COMMENTS = [
+    'No me preguntó por el libro.',
+    'MAMÁ: ¿Otra vez con ese libro? Ya casi no queda nada que empacar.',
+    'MAMÁ: Te está quedando poco tiempo, mi amor.',
+    'MAMÁ: Solo quedan las cosas grandes. Las tuyas van en la caja azul.',
+    'MAMÁ: ...¿Ya lo terminaste?'
+];
+
+export function morningLines(day, leafCount) {
+    const left = Math.max(1, 6 - day);
+    const days = left === 1 ? 'Queda un día.' : `Quedan ${left} días.`;
+    return [
+        `MAMÁ: Buenos días. ${days}`,
+        MORNING_COMMENTS[Math.min(MORNING_COMMENTS.length - 1, Math.floor(leafCount / 2))],
+        'Su voz suena como si cargara algo pesado.'
+    ];
 }
 
-export function showDialogue(lines, isEnding = false) {
+export const GOOD_LINES = [
+    'MAMÁ: ¿Ya estás listo?',
+    'Sí. Tengo el libro. Le puse las diez hojas en su lugar.',
+    'MAMÁ: Entonces vámonos. El camión ya está abajo.',
+    'Cerré el libro y lo apreté contra el pecho.',
+    'No me despedí de la casa. No supe cómo hacerlo.',
+    'Pero el libro iba completo, y eso era una forma de no perderla.'
+];
+
+export const BAD_LINES = [
+    'MAMÁ: Se acabó el tiempo, mi amor. Tenemos que irnos ya.',
+    'Cerré el libro con las hojas que todavía le faltaban.',
+    'Las otras se quedaron en algún rincón de esta casa.',
+    'Adentro quedaron las páginas que nunca alcancé a leer.'
+];
+
+export function startIntroDialogue(onDone = null) {
+    showDialogue(INTRO_LINES, false, onDone);
+}
+
+export function showDialogue(lines, isEnding = false, onDone = null) {
     dialogueState.active = true;
-    dialogueState.queue = lines;
+    dialogueState.queue = Array.isArray(lines) ? lines : [lines];
     dialogueState.currentIndex = 0;
     dialogueState.isEnding = isEnding;
+    dialogueState.onDone = onDone;
 }
 
 export function advanceDialogue() {
@@ -34,62 +70,67 @@ export function advanceDialogue() {
     if (dialogueState.currentIndex < dialogueState.queue.length - 1) {
         dialogueState.currentIndex += 1;
     } else if (!dialogueState.isEnding) {
+        const callback = dialogueState.onDone;
         dialogueState.active = false;
         dialogueState.queue = [];
         dialogueState.currentIndex = 0;
-    }
-}
-
-export function triggerMorningComment(day) {
-    const comments = {
-        2: ['Día 2 - 09:00: El sol entra por la habitación. Aún quedan recuerdos por recuperar.'],
-        3: ['Día 3 - 09:00: Mitad de semana. Revisa bien los horarios en que aparecen algunas hojas.'],
-        4: ['Día 4 - 09:00: Queda poco tiempo. Asegúrate de fabricar las herramientas necesarias.'],
-        5: ['Día 5 - 09:00: Último día en la casa. Encuentra las hojas restantes y habla con mamá.']
-    };
-    if (comments[day]) {
-        showDialogue(comments[day], false);
-    }
-}
-
-export function triggerEnding(hasAllPages) {
-    if (hasAllPages) {
-        showDialogue([
-            'FINAL BUENO: Le entregas las 10 hojas recuperadas a tu madre.',
-            'Ella sonríe por primera vez en días al leer cada recuerdo intacto.',
-            'Aunque dejen la casa atrás, la memoria de la familia sigue completa.'
-        ], true);
-    } else {
-        showDialogue([
-            'FINAL MALO: El quinto día ha terminado y las hojas siguen perdidas.',
-            'Empacan las cajas en silencio sabiendo que algo valioso quedó olvidado.',
-            'El tiempo se agotó.'
-        ], true);
+        dialogueState.onDone = null;
+        if (callback) callback();
     }
 }
 
 export function renderDialogueBox(ctx, canvasWidth, canvasHeight) {
     if (!dialogueState.active) return;
 
-    const boxHeight = 105;
-    const y = canvasHeight - boxHeight - 12;
+    const boxHeight = 110;
+    const y = canvasHeight - boxHeight - 14;
 
-    ctx.fillStyle = 'rgba(10, 10, 14, 0.94)';
+    ctx.fillStyle = 'rgba(20, 12, 22, 0.94)';
     ctx.fillRect(16, y, canvasWidth - 32, boxHeight);
 
-    ctx.strokeStyle = '#e6c280';
+    ctx.strokeStyle = '#d9a441';
     ctx.lineWidth = 2;
     ctx.strokeRect(16, y, canvasWidth - 32, boxHeight);
 
-    ctx.fillStyle = '#f5f5f5';
-    ctx.font = '14px Courier New';
-    const currentText = dialogueState.queue[dialogueState.currentIndex] || '';
-    ctx.fillText(currentText, 30, y + 38);
+    const raw = dialogueState.queue[dialogueState.currentIndex] || '';
+    const hasSpeaker = raw.startsWith('MAMÁ: ');
+    const speaker = hasSpeaker ? 'MAMÁ' : '';
+    const body = hasSpeaker ? raw.slice(6) : raw;
 
-    ctx.fillStyle = '#a3a3a3';
-    ctx.font = '12px Courier New';
+    let textY = y + 36;
+    if (speaker) {
+        ctx.fillStyle = '#ffb478';
+        ctx.font = 'bold 13px Courier New';
+        ctx.fillText(speaker, 30, y + 26);
+        textY = y + 48;
+    }
+
+    ctx.fillStyle = '#f6e8c8';
+    ctx.font = '14px Courier New';
+    wrapText(ctx, body, 30, textY, canvasWidth - 64, 19);
+
+    ctx.fillStyle = '#a8968a';
+    ctx.font = '11px Courier New';
     const hint = dialogueState.isEnding
-        ? 'Fin de la partida — Recarga la página para volver a jugar'
-        : `Presiona [E] para continuar (${dialogueState.currentIndex + 1}/${dialogueState.queue.length})`;
-    ctx.fillText(hint, 30, y + 80);
+        ? 'FIN — Recarga la página (F5) para volver a jugar'
+        : `Pulsa [E] para seguir (${dialogueState.currentIndex + 1}/${dialogueState.queue.length})`;
+    ctx.fillText(hint, 30, y + 95);
+}
+
+function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+    const words = text.split(' ');
+    let line = '';
+    let currentY = y;
+
+    for (let n = 0; n < words.length; n++) {
+        const testLine = line + words[n] + ' ';
+        if (ctx.measureText(testLine).width > maxWidth && n > 0) {
+            ctx.fillText(line, x, currentY);
+            line = words[n] + ' ';
+            currentY += lineHeight;
+        } else {
+            line = testLine;
+        }
+    }
+    ctx.fillText(line, x, currentY);
 }

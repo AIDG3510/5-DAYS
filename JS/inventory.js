@@ -1,27 +1,71 @@
+export const ITEM_NAMES = {
+    llave: 'Llave inglesa',
+    cinta: 'Rollo de cinta',
+    iman: 'Imán de nevera',
+    destornillador: 'Destornillador',
+    linterna: 'Linterna sin pilas',
+    cordel: 'Cordel',
+    pilas: 'Dos pilas',
+    cable: 'Cable mordido',
+    cable_reparado: 'Cable reparado',
+    iman_cuerda: 'Imán con cuerda',
+    linterna_on: 'Linterna encendida',
+    pertiga: 'Pértiga de luz'
+};
+
+const RECIPES = [
+    {
+        a: 'cable',
+        b: 'cinta',
+        out: 'cable_reparado',
+        line: 'Enrollo la cinta sobre el cable mordido. Queda feo, pero conduce.'
+    },
+    {
+        a: 'iman',
+        b: 'cordel',
+        out: 'iman_cuerda',
+        line: 'Ato el cordel al imán. Ya puedo pescar cosas donde no llega la mano.'
+    },
+    {
+        a: 'linterna',
+        b: 'pilas',
+        out: 'linterna_on',
+        line: 'Las pilas entran con un clic. El haz tiembla, pero alumbra.'
+    },
+    {
+        a: 'linterna_on',
+        b: 'iman_cuerda',
+        out: 'pertiga',
+        line: 'Ato la linterna al extremo de la cuerda. Ahora puedo mirar dentro de lo que no alcanzo.'
+    }
+];
+
 export const inventory = {
     items: [],
     selectedIndices: [],
-    pagesCollected: 0,
-    totalPages: 10,
+    leaves: [],
+    totalLeaves: 10,
     lastMessage: ''
 };
 
-const recipes = [
-    { pair: ['Cable mordido', 'Cinta'], result: 'Cable reparado' },
-    { pair: ['Imán', 'Cordel'], result: 'Imán con cuerda' },
-    { pair: ['Linterna', 'Pilas'], result: 'Linterna encendida' },
-    { pair: ['Linterna encendida', 'Imán con cuerda'], result: 'Pértiga de luz' }
-];
-
-export function addItem(itemName) {
-    if (!inventory.items.includes(itemName)) {
-        inventory.items.push(itemName);
-        inventory.lastMessage = `Obtuviste: ${itemName}`;
+export function addItem(itemId) {
+    if (!inventory.items.includes(itemId)) {
+        inventory.items.push(itemId);
     }
 }
 
-export function hasItem(itemName) {
-    return inventory.items.includes(itemName);
+export function hasItem(itemId) {
+    return inventory.items.includes(itemId);
+}
+
+export function hasLeaf(leafId) {
+    return inventory.leaves.includes(leafId);
+}
+
+export function collectLeaf(leafId) {
+    if (!inventory.leaves.includes(leafId)) {
+        inventory.leaves.push(leafId);
+    }
 }
 
 export function toggleSelectSlot(index) {
@@ -44,55 +88,52 @@ function tryCombine() {
     const itemA = inventory.items[idx1];
     const itemB = inventory.items[idx2];
 
-    const match = recipes.find(
-        (r) =>
-            (r.pair[0] === itemA && r.pair[1] === itemB) ||
-            (r.pair[0] === itemB && r.pair[1] === itemA)
+    const match = RECIPES.find(
+        (r) => (r.a === itemA && r.b === itemB) || (r.a === itemB && r.b === itemA)
     );
 
-    if (match) {
-        // Eliminar los dos ingredientes de mayor a menor índice
-        const sorted = [idx1, idx2].sort((a, b) => b - a);
-        inventory.items.splice(sorted[0], 1);
-        inventory.items.splice(sorted[1], 1);
-        inventory.items.push(match.result);
-        inventory.lastMessage = `¡Combinado! Creaste: ${match.result}`;
+    if (match && !inventory.items.includes(match.out)) {
+        inventory.items.push(match.out);
+        inventory.lastMessage = match.line;
+    } else if (match) {
+        inventory.lastMessage = 'Ya fabriqué eso.';
     } else {
-        inventory.lastMessage = `No se puede combinar ${itemA} con ${itemB}.`;
+        inventory.lastMessage = 'Esas dos cosas no encajan.';
     }
 
     inventory.selectedIndices = [];
 }
 
 export function renderInventoryHUD(ctx, canvasWidth, canvasHeight) {
-    // Barra inferior semitransparente para el inventario
-    ctx.fillStyle = 'rgba(15, 15, 15, 0.85)';
-    ctx.fillRect(0, canvasHeight - 62, canvasWidth, 62);
+    ctx.fillStyle = 'rgba(20, 12, 22, 0.9)';
+    ctx.fillRect(0, canvasHeight - 58, canvasWidth, 58);
 
-    ctx.fillStyle = '#e6c280';
-    ctx.font = 'bold 13px Courier New';
-    ctx.fillText(`Hojas: ${inventory.pagesCollected}/${inventory.totalPages}  |  Teclas [1-8] para seleccionar y combinar:`, 16, canvasHeight - 42);
+    ctx.fillStyle = '#d9a441';
+    ctx.font = 'bold 12px Courier New';
+    ctx.fillText(
+        `HOJAS: ${inventory.leaves.length}/${inventory.totalLeaves}  |  Pulsa [1-9] para juntar dos cosas:`,
+        14,
+        canvasHeight - 39
+    );
 
-    // Mostrar los objetos actuales numerados
-    let xOffset = 16;
-    ctx.font = '12px Courier New';
+    let xOffset = 14;
+    ctx.font = '11px Courier New';
 
     if (inventory.items.length === 0) {
-        ctx.fillStyle = '#888';
-        ctx.fillText('(Inventario vacío)', xOffset, canvasHeight - 18);
+        ctx.fillStyle = '#8a7a72';
+        ctx.fillText('No llevo nada encima.', xOffset, canvasHeight - 16);
     } else {
-        inventory.items.forEach((item, index) => {
+        inventory.items.forEach((id, index) => {
             const isSelected = inventory.selectedIndices.includes(index);
-            ctx.fillStyle = isSelected ? '#6ee7b7' : '#f0f0f0';
-            const text = `[${index + 1}] ${item}`;
-            ctx.fillText(text, xOffset, canvasHeight - 18);
-            xOffset += ctx.measureText(text).width + 16;
+            ctx.fillStyle = isSelected ? '#ffb478' : '#f6e8c8';
+            const label = `[${index + 1}] ${ITEM_NAMES[id] || id}`;
+            ctx.fillText(label, xOffset, canvasHeight - 16);
+            xOffset += ctx.measureText(label).width + 12;
         });
     }
 
-    // Mensaje reciente de combinación o recolección
     if (inventory.lastMessage) {
-        ctx.fillStyle = '#fde047';
-        ctx.fillText(inventory.lastMessage, 16, canvasHeight - 72);
+        ctx.fillStyle = '#ffe9b0';
+        ctx.fillText(inventory.lastMessage, 14, canvasHeight - 66);
     }
 }
