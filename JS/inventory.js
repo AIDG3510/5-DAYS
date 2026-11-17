@@ -105,35 +105,66 @@ function tryCombine() {
 }
 
 export function renderInventoryHUD(ctx, canvasWidth, canvasHeight) {
+    ctx.font = '11px Courier New';
+
+    const maxWidth = canvasWidth - 28;
+    const rows = [[]];
+    let currentWidth = 0;
+
+    inventory.items.forEach((id, index) => {
+        const label = `[${index + 1}] ${ITEM_NAMES[id] || id}`;
+        const labelWidth = ctx.measureText(label).width;
+        const spacing = rows[rows.length - 1].length > 0 ? 12 : 0;
+
+        if (currentWidth + spacing + labelWidth > maxWidth &&
+            rows[rows.length - 1].length > 0) {
+            rows.push([]);
+            currentWidth = 0;
+        }
+
+        rows[rows.length - 1].push({ index, label });
+
+        currentWidth +=
+            (rows[rows.length - 1].length > 1 ? 12 : 0) + labelWidth;
+    });
+
+    const panelHeight = 43 + rows.length * 17;
+    const panelTop = canvasHeight - panelHeight;
+
     ctx.fillStyle = 'rgba(20, 12, 22, 0.9)';
-    ctx.fillRect(0, canvasHeight - 58, canvasWidth, 58);
+    ctx.fillRect(0, panelTop, canvasWidth, panelHeight);
 
     ctx.fillStyle = '#d9a441';
     ctx.font = 'bold 12px Courier New';
+
     ctx.fillText(
         `HOJAS: ${inventory.leaves.length}/${inventory.totalLeaves}  |  Pulsa [1-9] para juntar dos cosas:`,
         14,
-        canvasHeight - 39
+        panelTop + 19
     );
 
-    let xOffset = 14;
     ctx.font = '11px Courier New';
 
     if (inventory.items.length === 0) {
         ctx.fillStyle = '#8a7a72';
-        ctx.fillText('No llevo nada encima.', xOffset, canvasHeight - 16);
+        ctx.fillText('No llevo nada encima.', 14, panelTop + 42);
     } else {
-        inventory.items.forEach((id, index) => {
-            const isSelected = inventory.selectedIndices.includes(index);
-            ctx.fillStyle = isSelected ? '#ffb478' : '#f6e8c8';
-            const label = `[${index + 1}] ${ITEM_NAMES[id] || id}`;
-            ctx.fillText(label, xOffset, canvasHeight - 16);
-            xOffset += ctx.measureText(label).width + 12;
+        rows.forEach((row, rowIndex) => {
+            let xOffset = 14;
+
+            row.forEach(({ index, label }) => {
+                const isSelected = inventory.selectedIndices.includes(index);
+
+                ctx.fillStyle = isSelected ? '#ffb478' : '#f6e8c8';
+                ctx.fillText(label, xOffset, panelTop + 42 + rowIndex * 17);
+
+                xOffset += ctx.measureText(label).width + 12;
+            });
         });
     }
 
     if (inventory.lastMessage) {
         ctx.fillStyle = '#ffe9b0';
-        ctx.fillText(inventory.lastMessage, 14, canvasHeight - 66);
+        ctx.fillText(inventory.lastMessage, 14, panelTop - 8);
     }
 }

@@ -27,7 +27,11 @@ import {
     renderDialogueBox
 } from './dialogue.js';
 import { getNearestInteractable, interact, renderNearHint } from './interactions.js';
-import { playStepSound, playCollectSound } from './audio.js';
+import {
+    playStepSound,
+    playCollectSound,
+    setAmbientPhase
+} from './audio.js';
 
 const canvas = document.getElementById('game-canvas');
 const ctx = canvas.getContext('2d');
@@ -142,6 +146,19 @@ function update(deltaSeconds) {
     }
 
     updateClock(deltaSeconds);
+    const hour = Math.floor(clockState.minutes / 60);
+
+    if (hour >= 5 && hour < 7) {
+        setAmbientPhase('dawn');
+    } else if (hour >= 7 && hour < 17) {
+        setAmbientPhase('day');
+    } else if (hour >= 17 && hour < 20) {
+        setAmbientPhase('golden');
+    } else if (hour >= 20 && hour < 21) {
+        setAmbientPhase('dusk');
+    } else {
+        setAmbientPhase('night');
+    }
 
     if (clockState.isGameOver && !dialogueState.active) {
         showDialogue(BAD_LINES, true);

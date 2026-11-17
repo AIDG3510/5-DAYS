@@ -36,9 +36,7 @@ export function advanceMinutes(mins) {
 }
 
 export function adjustTime(deltaMinutes) {
-    clockState.minutes += deltaMinutes;
-    if (clockState.minutes < 0) clockState.minutes += 1440;
-    if (clockState.minutes >= 1440) clockState.minutes -= 1440;
+    advanceMinutes(deltaMinutes);
 }
 
 export function sleepUntilMorning() {
