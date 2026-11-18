@@ -30,7 +30,7 @@ Tras anunciar su madre que deben mudarse de casa en cinco días, el protagonista
 | :--- | :--- |
 | **`W` `A` `S` `D`** o **Flechas** | Mover al personaje por la casa |
 | **`E`** o **`Enter`** | Interactuar con objetos, puertas, personajes y avanzar diálogos |
-| **`1` – `9`** | Seleccionar dos objetos del inventario para combinarlos |
+| **`1` – `9`** y **`Z` - `C`** | Seleccionar dos objetos del inventario para combinarlos |
 
 ---
 
