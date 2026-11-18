@@ -81,7 +81,7 @@ export function interact(id, ctx) {
         case 'to_habitacion':
             return goRoom('habitacion', 540, 265);
         case 'to_sala_c':
-            return goRoom('sala', 65, 265);
+            return goRoom('sala', 190, 265);
         case 'to_sala_b':
             return goRoom('sala', 550, 265);
         case 'to_sala_h':
@@ -341,8 +341,8 @@ export function interact(id, ctx) {
             return showDialogue(['Adentro cabe todo menos lo que de verdad quiero llevarme.']);
 
         case 'cama':
-            if (hf < 19) {
-                return showDialogue(['Todavía hay luz. No tengo sueño.']);
+            if (hf < 23) {
+                return showDialogue(['Todavía no tengo sueño. Es demasiado temprano.']);
             }
             return showDialogue(['Me acosté con el libro abierto sobre la almohada.'], false, sleep);
 
