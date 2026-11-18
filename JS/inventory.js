@@ -107,12 +107,14 @@ function tryCombine() {
 export function renderInventoryHUD(ctx, canvasWidth, canvasHeight) {
     ctx.font = '11px Courier New';
 
+    const slotLabels = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'Z', 'X', 'C'];
     const maxWidth = canvasWidth - 28;
     const rows = [[]];
     let currentWidth = 0;
 
     inventory.items.forEach((id, index) => {
-        const label = `[${index + 1}] ${ITEM_NAMES[id] || id}`;
+        const keyChar = slotLabels[index] || '?';
+        const label = `[${keyChar}] ${ITEM_NAMES[id] || id}`;
         const labelWidth = ctx.measureText(label).width;
         const spacing = rows[rows.length - 1].length > 0 ? 12 : 0;
 
@@ -138,7 +140,7 @@ export function renderInventoryHUD(ctx, canvasWidth, canvasHeight) {
     ctx.font = 'bold 12px Courier New';
 
     ctx.fillText(
-        `HOJAS: ${inventory.leaves.length}/${inventory.totalLeaves}  |  Pulsa [1-9] para juntar dos cosas:`,
+        `HOJAS: ${inventory.leaves.length}/${inventory.totalLeaves}  |  Pulsa [1-9 / Z-C] para juntar dos cosas:`,
         14,
         panelTop + 19
     );

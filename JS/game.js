@@ -98,9 +98,12 @@ window.addEventListener('keydown', (e) => {
 
     if (dialogueState.active) return;
 
-    const num = parseInt(e.key, 10);
-    if (num >= 1 && num <= 9) {
-        toggleSelectSlot(num - 1);
+    // Índices 0-8: teclas '1'-'9' | Índices 9-13: teclas 'z', 'x' y 'c'
+    const slotKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'z', 'x', 'c'];
+    const slotIndex = slotKeys.indexOf(key);
+
+    if (slotIndex !== -1) {
+        toggleSelectSlot(slotIndex);
     }
 });
 

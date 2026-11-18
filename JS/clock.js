@@ -42,7 +42,7 @@ export function adjustTime(deltaMinutes) {
 export function sleepUntilMorning() {
     if (clockState.day < clockState.maxDays) {
         clockState.day += 1;
-        clockState.minutes = 9 * 60; // 09:00 AM, hora a la que se levanta (Adelantar tiempo)
+        clockState.minutes = 5 * 60; // 05:00 AM, hora a la que se levanta (Dormir)
     } else {
         clockState.isGameOver = true;
     }
